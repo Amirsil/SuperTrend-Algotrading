@@ -1,0 +1,25 @@
+# Cursor AI Instructions
+
+## Code Quality Standards
+
+### NO COMMENTS POLICY
+- NEVER write comments in code
+- Focus on writing self-documenting, readable code instead
+- Use descriptive variable names and function names
+- Break complex logic into smaller, well-named functions
+- Comments are a code smell - if you need to explain code with comments, the code isn't clear enough
+
+### Code Style
+- Write clean, readable code that speaks for itself
+- Use meaningful names that describe intent
+- Prefer explicit over implicit
+- Keep functions small and focused
+- Use TypeScript types to document interfaces and contracts
+
+### When Code Needs Explanation
+- Refactor the code to be more readable
+- Extract complex logic into well-named functions
+- Use descriptive variable names
+- Consider if the code is doing too much (single responsibility principle)
+
+Remember: Good code doesn't need comments to be understood.
