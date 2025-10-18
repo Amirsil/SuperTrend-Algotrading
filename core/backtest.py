@@ -227,11 +227,31 @@ def run_backtest(df, initial_capital=10000, period=10, multiplier=3.0, df_with_s
     }
 
 
-def calculate_buy_and_hold_return(df, initial_capital=10000):
-    first_price = df.iloc[0]['close']
+def calculate_buy_and_hold_return(df, initial_capital=10000, df_with_signals=None):
+    """
+    Calculate buy and hold return starting from when SuperTrend line becomes valid.
+    If df_with_signals is provided, use the first valid SuperTrend date as start.
+    Otherwise, use the first date in df.
+    """
+    if df_with_signals is not None:
+        # Find the first row where supertrend line is valid (not NaN)
+        start_date = None
+        for i, (timestamp, row) in enumerate(df_with_signals.iterrows()):
+            if not pd.isna(row['supertrend_up']):
+                start_date = timestamp
+                break
+        
+        if start_date is None:
+            # Fallback to first date if no valid supertrend found
+            start_date = df.index[0]
+    else:
+        start_date = df.index[0]
+    
+    # Get the price at the start date and end date
+    start_price = df.loc[start_date, 'close']
     last_price = df.iloc[-1]['close']
     
-    shares = initial_capital / first_price
+    shares = initial_capital / start_price
     final_value = shares * last_price
     
     return (final_value - initial_capital) / initial_capital * 100
@@ -261,8 +281,26 @@ def plot_backtest_results(results, df, symbol, save_path=None):
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
     
-    buy_hold_return = calculate_buy_and_hold_return(df)
-    buy_hold_curve = df['close'] / df['close'].iloc[0] * 10000
+    buy_hold_return = calculate_buy_and_hold_return(df, df_with_signals=df_with_signals)
+    
+    # Calculate buy and hold curve starting from when SuperTrend becomes valid
+    if df_with_signals is not None:
+        # Find the first row where supertrend line is valid (not NaN)
+        start_date = None
+        for i, (timestamp, row) in enumerate(df_with_signals.iterrows()):
+            if not pd.isna(row['supertrend_up']):
+                start_date = timestamp
+                break
+        
+        if start_date is None:
+            # Fallback to first date if no valid supertrend found
+            start_date = df.index[0]
+    else:
+        start_date = df.index[0]
+    
+    # Create buy and hold curve starting from the SuperTrend start date
+    start_price = df.loc[start_date, 'close']
+    buy_hold_curve = df['close'] / start_price * 10000
     
     axes[1].plot(results['equity_curve'].index, results['equity_curve'], 
                  label=f'Supertrend Strategy ({results["total_return"]:.1f}%)', 
